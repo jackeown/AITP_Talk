@@ -1,0 +1,257 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>reveal.js</title>
+
+		<link rel="stylesheet" href="css/reset.css">
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/black.css">
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm" crossorigin="anonymous"/>
+
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/monokai.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<style>
+			.reveal i{
+				font-family: 'FontAwesome';
+				font-style: normal;
+			}
+			.red{
+				color:rgb(255, 150, 150);
+			}
+			.green{
+				color:rgb(150, 255, 150);
+			}
+			.yellow{
+				color:rgb(255, 255, 123);
+			}
+			.row{
+				display:flex;
+				flex-direction:row;
+				justify-content: space-around;
+			}
+			.box{
+				border:1px solid white;
+				padding:15px;
+				margin:5px;
+				font-size:24pt;
+			}
+			.emph{
+				font-style:italic;
+			}
+			.ul{
+				text-decoration: underline;
+			}
+			.reveal section img{
+				background-color: whitesmoke;
+			}
+
+			.table{
+				border: 1px solid whitesmoke;
+			}
+
+			.table tr:first-child {
+				background: rgba(255,255,255,0.5);
+				color: black;
+			}
+
+		</style>
+		<div class="reveal">
+			<div class="slides">
+				<section>
+					<h3>Reinforcement learning in E</h3>
+					<hr>
+					<h6 style="text-transform: none">Jack McKeown and Geoff Sutcliffe</h6>
+					<aside class="notes">
+						Hi everyone.
+						My name is Jack McKeown and my advisor is Geoff Sutcliffe.
+						Today I'll be presenting our work on Reinforcement Learning in the E theorem prover.
+					</aside>
+				</section>
+
+				<section>
+					<h3>Outline</h3>
+					<div class="box">
+						<ol>
+							<li>Previous work in Reinforcement Learning (RL) for ATP</li>
+							<li>Incorporation of RL into Eprover</li>
+							<li>Results</li>
+							<li>Future directions</li>
+						</ol>
+					</div>
+					<aside class="notes">
+						First I'm going to talk about some relevant previous and current work others have done.
+						Then I'll talk about how our approach and our results.
+						And I'll finish by discussing future directions for this research.
+					</aside>
+				</section>
+
+				<section>
+					<h3>Previous work in RL for ATP</h3>
+					<section>
+						<img src="images/classification.svg">
+						<aside class="notes">
+							Here is a diagram of the most relevant previous work that I'm aware of.
+							The two papers on the left both used the tableaux calculus, whereas the
+							others all use some saturation based prover due to their generally superior performance.
+						</aside>
+					</section>
+
+					<section style="outline:1px solid rgb(150, 255, 150); transform: scale(0.8); padding:1em;">
+						<h4>Other choices to make</h4>
+						<ul>
+							<li class="fragment">What are the states, actions, and rewards?</li>
+							<li class="fragment">Monte Carlo Tree Search?</li>
+							<li class="fragment">Which RL algorithm to use?</li>
+							<li class="fragment">Reward Shaping?
+								<ul>
+									<li>
+										Optimal policy is preserved when <span class="green">$r := r + \lambda f(s') - f(s)$</span>
+									</li>
+								</ul>
+							<li class="fragment">Problem Sampling
+								<ul>
+									<li>Oversample Hard Problems? (More meaningful reward signal)</li>
+									<li>Oversample Easy Problems? (Faster Training)</li>
+								</ul>
+							</li>
+						</ul>
+						<aside class="notes">
+							Aside from the choice of calculus and prover, there are more general choices that
+							must be made when considering theorem proving as a reinforcement learning problem.<br><br>
+
+							What should the states, actions, and rewards be?<br>
+							Should we use monte carlo tree search to help out the learning as AlphaZero did for solving the game of Go.<br>
+							Which RL algorithm should we use? Deep Q Learning? Policy Gradients? Actor Critic? Something Else?<br>
+							Related to choosing the rewards themselves is the question of reward shaping which asks
+							"How can we change the rewards to make learning faster or smoother, while keeping the same optimal policy"<br>
+							Also of concern is what data to use for learning.
+							Should we oversample hard problems so that the learned model has been trained to solve hard Problems?
+							Or does training on hard problems just cause the learning to be unbearably slow because we have to wait for an entire failed proof attempt.
+
+						</aside>
+					</section>
+
+					<section style="outline:1px solid rgb(150, 255, 150); transform: scale(0.8); padding:1em;">
+						<h4>The choices we made</h4>
+						<ul>
+							<li class="fragment">What are the states, actions, and rewards?</li>
+							<li class="fragment"><span class="green">state:</span> <span class="red">length and average weight of processed and unprocessed sets</span></li>
+							<li class="fragment"><span class="green">actions:</span> <span class="red">choice from a static set of 75 predetermined clause evaluation functions</span></li>
+							<li class="fragment"><span class="green">rewards:</span> <span class="red">1 if proof found else 0</span></li>
+
+							<li class="fragment">Monte Carlo Tree Search? - <span class="green">not yet</span></li>
+							<li class="fragment">Which RL algorithm to use? - <span class="green">vanilla policy gradients</span></li>
+							<li class="fragment">Reward Shaping? - <span class="green">none</span></li>
+							<li class="fragment">Problem Sampling - <span class="green">uniform</span></li>
+						</ul>
+					</section>
+				</section>
+
+				<section>
+					<h3>Incorporation of RL into Eprover</h3>
+					<section>
+						<img src="images/architecture.svg">
+						<aside class="notes">
+							So that was some previous work and an overview of this space, but
+							now we come to our work.<br><br>
+
+							This is a diagram to help me explain how we structured the learning.<br>
+							The red box is our trusty theorem prover E.
+							The green boxes are all python scripts that otherwise guide the learning.<br><br>
+
+							e_caller.py invokes E with a problem to be solved.<br>
+							E itself has been modified to coordinate with gain_xp.py via named pipes.
+							E sends its "state" to gain_xp.py,<br>
+							gain_xp.py sends an "action" back to E,<br>
+							and E sends back a "reward" to gain_xp.py<br><br>
+
+							train_policy.py is used to update the policy according to which gain_xp.py acts.
+							It does this using data from previous proof attempts recorded by gain_xp.py
+						</aside>
+					</section>
+
+					<section>
+						<img src="images/architecture2.svg" style="width:80%;">
+						<aside class="notes">
+							Here's another diagram describing the same system from a higher level.
+						</aside>
+					</section>
+				</section>
+
+				<section>
+					<h3>Results</h3>
+					<section>
+						<table class="table">
+							<tr><th>RL Policy</th> <th>Problems Solved</th> <th>Percentage Solved</th></tr>
+							<tr><td>Uniform Distribution</td> <td>1105</td> <td>53.2%</td></tr>
+							<tr class="fragment"><td>Learned Distribution</td> <td>1105</td> <td>53.2%</td></tr>
+							<tr class="fragment"><td>Neural Network Policy</td> <td>1110</td> <td>53.4%</td></tr>
+							<tr class="fragment" style="background-color: rgba(200,200,255,0.5)"><td>E --auto</td> <td>1156</td> <td>55.6%</td></tr>
+						</table>
+					</section>
+				</section>
+
+				<section>
+					<h3>Future Directions</h3>
+					<ul>
+						<li>Add Monte Carlo Tree Search</li>
+						<li>Neural States and Actions as in TRAIL</li>
+						<li>Perhaps incorporate problem difficulty into rewards</li>
+						<li>Other ideas for how to retain the awesomeness of E's --auto mode</li>
+					</ul>
+				</section>
+
+
+				<section>
+					<h3>Thanks for listening</h3>
+					<em class="green">Questions?</em>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					<em class="green">Suggestions / Advice?</em><br>
+				</section>
+
+			</div>
+		</div>
+
+		<script src="js/reveal.js"></script>
+		<script src="plugin/notes/notes.js"></script>
+
+		<script>
+			// More info about config & dependencies:
+			// - https://github.com/hakimel/reveal.js#configuration
+			// - https://github.com/hakimel/reveal.js#dependencies
+			Reveal.initialize({
+				plugins: [RevealNotes],
+				hash: true,
+				math: {
+					mathjax: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js',
+					config: 'TeX-AMS_HTML-full', // See http://docs.mathjax.org/en/latest/config-files.html
+					// pass other options into `MathJax.Hub.Config()`
+					TeX: { Macros: { RR: "{\\bf R}" } }
+				},
+
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/highlight/highlight.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/math/math.js', async: true },
+				]
+			});
+
+		</script>
+	</body>
+</html>
