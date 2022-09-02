@@ -69,13 +69,17 @@
 				color: black;
 			}
 
+			.small {
+				font-size: 80%;
+			}
+
 		</style>
 		<div class="reveal">
 			<div class="slides">
 				<section>
 					<h3>Reinforcement learning in E</h3>
 					<hr>
-					<h6 style="text-transform: none">Jack McKeown and Geoff Sutcliffe</h6>
+					<h6 style="text-transform: none">Jack McKeown <span class="green small">(mckeown@cs.miami.edu)</span><br> <span class="small">advised by Geoff Sutcliffe <span class="green small">(geoff@cs.miami.edu)</span></span></h6>
 					<aside class="notes">
 						Hi everyone.
 						My name is Jack McKeown and my advisor is Geoff Sutcliffe.
@@ -95,7 +99,7 @@
 					</div>
 					<aside class="notes">
 						First I'm going to talk about some relevant previous and current work others have done.
-						Then I'll talk about how our approach and our results.
+						Then I'll talk about our approach and our results.
 						And I'll finish by discussing future directions for this research.
 					</aside>
 				</section>
@@ -125,8 +129,8 @@
 								</ul>
 							<li class="fragment">Problem Sampling
 								<ul>
-									<li>Oversample Hard Problems? (More meaningful reward signal)</li>
-									<li>Oversample Easy Problems? (Faster Training)</li>
+									<li>Oversample hard problems? (More meaningful reward signal)</li>
+									<li>Oversample easy problems? (Faster training)</li>
 								</ul>
 							</li>
 						</ul>
@@ -159,6 +163,15 @@
 							<li class="fragment">Reward Shaping? - <span class="green">none</span></li>
 							<li class="fragment">Problem Sampling - <span class="green">uniform</span></li>
 						</ul>
+
+						<aside class="notes">
+							To represent E's state, we used a vector of 4 features: the length and average weight of the unprocessed and processed sets of clauses.<br>
+							<br>
+							What makes this work the most different from other approaches to this problem is our choice of action.<br>
+							Most other work directly tries to choose the given clause, but our actions are a choice from a static set of 75 predetermined clause evaluation functions.<br>
+							<br>
+							For rewards, we simply give a zero for each iteration of the main given clause selection loop unless we have selected the empty clause.
+						</aside>
 					</section>
 				</section>
 
@@ -167,10 +180,8 @@
 					<section>
 						<img src="images/architecture.svg">
 						<aside class="notes">
-							So that was some previous work and an overview of this space, but
-							now we come to our work.<br><br>
 
-							This is a diagram to help me explain how we structured the learning.<br>
+							This is a diagram to help me explain how we structured the learning in our experiment.<br>
 							The red box is our trusty theorem prover E.
 							The green boxes are all python scripts that otherwise guide the learning.<br><br>
 
@@ -209,10 +220,10 @@
 				<section>
 					<h3>Future Directions</h3>
 					<ul>
-						<li>Add Monte Carlo Tree Search</li>
-						<li>Neural States and Actions as in TRAIL</li>
-						<li>Perhaps incorporate problem difficulty into rewards</li>
-						<li>Other ideas for how to retain the awesomeness of E's --auto mode</li>
+						<li>Add Monte Carlo Tree Search (MCTS)</li>
+						<li>Neural states and actions as in TRAIL</li>
+						<li>Incorporate problem difficulty into rewards</li>
+						<li>Other ideas for how to retain the awesomeness of E's <span class="emph green">--auto</span> mode</li>
 					</ul>
 				</section>
 
