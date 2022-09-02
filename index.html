@@ -79,7 +79,7 @@
 				<section>
 					<h3>Reinforcement learning in E</h3>
 					<hr>
-					<h6 style="text-transform: none">Jack McKeown <span class="green small">(mckeown@cs.miami.edu)</span><br> <span class="small">advised by Geoff Sutcliffe <span class="green small">(geoff@cs.miami.edu)</span></span></h6>
+					<h6 style="text-transform: none">Jack McKeown <span class="green small">(mckeown@cs.miami.edu)</span><br> <span class="small">(advised by Geoff Sutcliffe <span class="green small">(geoff@cs.miami.edu))</span></span></h6>
 					<aside class="notes">
 						Hi everyone.
 						My name is Jack McKeown and my advisor is Geoff Sutcliffe.
@@ -135,8 +135,7 @@
 							</li>
 						</ul>
 						<aside class="notes">
-							Aside from the choice of calculus and prover, there are more general choices that
-							must be made when considering theorem proving as a reinforcement learning problem.<br><br>
+							Aside from the choice of calculus and prover, here are some other important choices to make.<br><br>
 
 							What should the states, actions, and rewards be?<br>
 							Should we use monte carlo tree search to help out the learning as AlphaZero did for solving the game of Go.<br>
@@ -180,7 +179,6 @@
 					<section>
 						<img src="images/architecture.svg">
 						<aside class="notes">
-
 							This is a diagram to help me explain how we structured the learning in our experiment.<br>
 							The red box is our trusty theorem prover E.
 							The green boxes are all python scripts that otherwise guide the learning.<br><br>
@@ -214,6 +212,17 @@
 							<tr class="fragment"><td>Neural Network Policy</td> <td>1110</td> <td>53.4%</td></tr>
 							<tr class="fragment" style="background-color: rgba(200,200,255,0.5)"><td>E --auto</td> <td>1156</td> <td>55.6%</td></tr>
 						</table>
+						<aside class="notes">
+							As a baseline, we evaluated a policy which just uniformly samples clause evaluation functions for each selection.<br>
+							We then compared this to a learned categorical distribution over clause evaluation functions.<br>
+							Somewhat surprisingly, this didn't have an appreciable effect on the number of solved problems despite drastically changing the distribution.<br>
+							Notice that neither of these policies take the state of E into account, but rather just sample from a constant distribution.<br><br>
+							
+							Naturally, we'd like to take the state of E into account, so we made a simple neural network in PyTorch to learn a mapping from E's state to a distribution over the clause evaluation functions.<br>
+							This distribution is then sampled from to yield the final action taken by this policy.<br>
+							This solved another 5 problems, but was still quite underwhelming.<br>
+							Finally we can compare all of these to the gold standard of using E's --auto mode which blew us away.
+						</aside>
 					</section>
 				</section>
 
