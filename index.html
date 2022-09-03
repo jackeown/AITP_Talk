@@ -45,8 +45,8 @@
 				justify-content: space-around;
 			}
 			.box{
-				border:1px solid white;
-				padding:15px;
+				border:1px solid rgb(150, 255, 150);
+				padding:0px;
 				margin:5px;
 				font-size:24pt;
 			}
@@ -73,13 +73,17 @@
 				font-size: 80%;
 			}
 
+			*::selection{
+				color: black;
+			}
+
 		</style>
 		<div class="reveal">
 			<div class="slides">
 				<section>
 					<h3>Reinforcement learning in E</h3>
 					<hr>
-					<h6 style="text-transform: none">Jack McKeown <span class="green small">(mckeown@cs.miami.edu)</span><br> <span class="small">(advised by Geoff Sutcliffe <span class="green small">(geoff@cs.miami.edu))</span></span></h6>
+					<h6 style="text-transform: none">Jack McKeown <span class="green small">(mckeown@cs.miami.edu)</span><br> <span class="small">(advised by Geoff Sutcliffe <span class="green small">(geoff@cs.miami.edu)</span>)</span></h6>
 					<aside class="notes">
 						Hi everyone.
 						My name is Jack McKeown and my advisor is Geoff Sutcliffe.
@@ -89,7 +93,7 @@
 
 				<section>
 					<h3>Outline</h3>
-					<div class="box">
+					<div class="box" style="padding: 0.5em 0em; width:90%; margin:auto;">
 						<ol>
 							<li>Previous work in Reinforcement Learning (RL) for ATP</li>
 							<li>Incorporation of RL into Eprover</li>
@@ -107,7 +111,9 @@
 				<section>
 					<h3>Previous work in RL for ATP</h3>
 					<section>
-						<img src="images/classification.svg">
+						<div class="box">
+							<img src="images/classification.svg">
+						</div>
 						<aside class="notes">
 							Here is a diagram of the most relevant previous work that I'm aware of.
 							The two papers on the left both used the tableaux calculus, whereas the
@@ -115,25 +121,27 @@
 						</aside>
 					</section>
 
-					<section style="outline:1px solid rgb(150, 255, 150); transform: scale(0.8); padding:1em;">
-						<h4>Other choices to make</h4>
-						<ul>
-							<li class="fragment">What are the states, actions, and rewards?</li>
-							<li class="fragment">Monte Carlo Tree Search?</li>
-							<li class="fragment">Which RL algorithm to use?</li>
-							<li class="fragment">Reward Shaping?
-								<ul>
-									<li>
-										Optimal policy is preserved when <span class="green">$r := r + \lambda f(s') - f(s)$</span>
-									</li>
-								</ul>
-							<li class="fragment">Problem Sampling
-								<ul>
-									<li>Oversample hard problems? (More meaningful reward signal)</li>
-									<li>Oversample easy problems? (Faster training)</li>
-								</ul>
-							</li>
-						</ul>
+					<section>
+						<div style="outline:1px solid rgb(150, 255, 150); transform: scale(0.7); padding:1em;top:0px;">
+							<h4>Other choices to make</h4>
+							<ul>
+								<li class="fragment">What are the states, actions, and rewards?</li>
+								<li class="fragment">Monte Carlo Tree Search?</li>
+								<li class="fragment">Which RL algorithm to use?</li>
+								<li class="fragment">Reward shaping?
+									<ul>
+										<li>
+											Optimal policy is preserved when <span class="green">$r := r + \lambda f(s') - f(s)$</span>
+										</li>
+									</ul>
+								<li class="fragment">Problem sampling
+									<ul>
+										<li>Oversample hard problems? (More meaningful reward signal)</li>
+										<li>Oversample easy problems? (Faster training)</li>
+									</ul>
+								</li>
+							</ul>
+						</div>
 						<aside class="notes">
 							Aside from the choice of calculus and prover, here are some other important choices to make.<br><br>
 
@@ -149,34 +157,72 @@
 						</aside>
 					</section>
 
-					<section style="outline:1px solid rgb(150, 255, 150); transform: scale(0.8); padding:1em;">
-						<h4>The choices we made</h4>
-						<ul>
-							<li class="fragment">What are the states, actions, and rewards?</li>
-							<li class="fragment"><span class="green">state:</span> <span class="red">length and average weight of processed and unprocessed sets</span></li>
-							<li class="fragment"><span class="green">actions:</span> <span class="red">choice from a static set of 75 predetermined clause evaluation functions</span></li>
-							<li class="fragment"><span class="green">rewards:</span> <span class="red">1 if proof found else 0</span></li>
-
-							<li class="fragment">Monte Carlo Tree Search? - <span class="green">not yet</span></li>
-							<li class="fragment">Which RL algorithm to use? - <span class="green">vanilla policy gradients</span></li>
-							<li class="fragment">Reward Shaping? - <span class="green">none</span></li>
-							<li class="fragment">Problem Sampling - <span class="green">uniform</span></li>
-						</ul>
+					<section style="padding: 0px 0px;">
+						<div style="outline:1px solid rgb(150, 255, 150); transform: scale(0.7); padding:1em; line-height: 1.2em;">
+							<h4>The choices we made</h4>
+							<ul>
+								<li class="fragment">What are the states, actions, and rewards?</li>
+								<li class="fragment"><span class="green">state:</span> <span class="red">length and average weight of processed and unprocessed sets</span></li>
+								<li class="fragment"><span class="green">actions:</span> <span class="red">choice from a static set of 75 clause evaluation functions (suggested by Stephan Schulz)</span></li>
+								<li class="fragment"><span class="green">rewards:</span> <span class="red">1 if proof found else 0</span></li>
+	
+								<li class="fragment">Monte Carlo Tree Search? - <span class="green">not yet</span></li>
+								<li class="fragment">Which RL algorithm to use? - <span class="green">vanilla policy gradients</span></li>
+								<li class="fragment">Reward shaping? - <span class="green">none</span></li>
+								<li class="fragment">Problem sampling - <span class="green">uniform</span></li>
+							</ul>
+						</div>
 
 						<aside class="notes">
 							To represent E's state, we used a vector of 4 features: the length and average weight of the unprocessed and processed sets of clauses.<br>
 							<br>
 							What makes this work the most different from other approaches to this problem is our choice of action.<br>
-							Most other work directly tries to choose the given clause, but our actions are a choice from a static set of 75 predetermined clause evaluation functions.<br>
+							Most other work directly tries to choose the given clause, but our actions are a choice from a static set of 75 clause evaluation functions (suggested by Stephan Schulz).<br>
 							<br>
 							For rewards, we simply give a zero for each iteration of the main given clause selection loop unless we have selected the empty clause.
 						</aside>
+					</section>
+
+					<section style="font-size:0.8em">
+						<div class="box" style="padding: 1em 0em;">
+							<h3>RL in relation to E's Automatic Mode</h3>
+
+							<ul>
+									<li class="fragment"><span class="ul">E's "--auto" mode</span>: <em class="green">features of a problem</em> $\rightarrow$ <em class="green">heuristic</em></li>
+									<li class="fragment"><span class="ul">Usual RL idea</span>: <em class="green">state of E</em> $\rightarrow$ <em class="green">given clause</em></li>
+									<li class="fragment"><span class="ul">Our RL idea</span>: <em class="green">state of E</em> $\rightarrow$ <em class="green">probabilistic heuristic</em></li>
+									<br>
+							</ul>
+	
+							<div class="row">
+								<textarea class="fragment" cols="50" rows="7" style="overflow: hidden;">
+Example Heuristic in E's --auto mode:
+
+10 * Clauseweight(PreferGoals,1,1,1),
+10 * Clauseweight(PreferNonGoals,1,1,1),
+10 * Clauseweight(ByHornDist,1,1,1),
+1 * FIFOWeight(ConstPrio)
+								</textarea>
+	
+								<textarea class="fragment" cols="50" rows="7" style="overflow: hidden;">
+Example Heuristic in Reinforcement Learning mode:
+
+0.1 * Clauseweight(PreferGoals,1,1,1),
+0.8 * Clauseweight(PreferNonGoals,1,1,1),
+0.1 * Clauseweight(ByHornDist,1,1,1),
+0.0 * FIFOWeight(ConstPrio),
+...
+								</textarea>
+	
+							</div>
+						</div>
+
 					</section>
 				</section>
 
 				<section>
 					<h3>Incorporation of RL into Eprover</h3>
-					<section>
+					<!-- <section>
 						<img src="images/architecture.svg">
 						<aside class="notes">
 							This is a diagram to help me explain how we structured the learning in our experiment.<br>
@@ -192,26 +238,43 @@
 							train_policy.py is used to update the policy according to which gain_xp.py acts.
 							It does this using data from previous proof attempts recorded by gain_xp.py
 						</aside>
-					</section>
+					</section> -->
 
 					<section>
-						<img src="images/architecture2.svg" style="width:80%;">
+						<div class="box" style="margin-top: 1em;">
+							<img src="images/architecture2.svg" style="width:80%;">
+						</div>
 						<aside class="notes">
 							Here's another diagram describing the same system from a higher level.
 						</aside>
 					</section>
 				</section>
 
+
+				<section>
+					<h3>Dataset</h3>
+					<div class="box" style="padding: 1em 0em;">
+						<ul>
+							<li>MPTPTP2078 - extracted from Mizar</li>
+							<li>Bushy variants of problems</li>
+							<li>60 soft seconds given for timeout</li>
+						</ul>
+					</div>
+
+				</section>
+
 				<section>
 					<h3>Results</h3>
 					<section>
-						<table class="table">
-							<tr><th>RL Policy</th> <th>Problems Solved</th> <th>Percentage Solved</th></tr>
-							<tr><td>Uniform Distribution</td> <td>1105</td> <td>53.2%</td></tr>
-							<tr class="fragment"><td>Learned Distribution</td> <td>1105</td> <td>53.2%</td></tr>
-							<tr class="fragment"><td>Neural Network Policy</td> <td>1110</td> <td>53.4%</td></tr>
-							<tr class="fragment" style="background-color: rgba(200,200,255,0.5)"><td>E --auto</td> <td>1156</td> <td>55.6%</td></tr>
-						</table>
+						<div class="box" style="padding: 1em 0em; width:80%; margin:auto;">
+							<table class="table">
+								<tr><th>RL Policy</th> <th>Problems</th> <th>Percentage</th></tr>
+								<tr class="fragment"><td>Uniform Distribution</td> <td>1105</td> <td>53.2%</td></tr>
+								<tr class="fragment"><td>Learned Distribution</td> <td>1105</td> <td>53.2%</td></tr>
+								<tr class="fragment"><td>Neural Network Policy</td> <td>1110</td> <td>53.4%</td></tr>
+								<tr class="fragment" style="background-color: rgba(200,200,255,0.5)"><td>E --auto</td> <td>1156</td> <td>55.6%</td></tr>
+							</table>
+						</div>
 						<aside class="notes">
 							As a baseline, we evaluated a policy which just uniformly samples clause evaluation functions for each selection.<br>
 							We then compared this to a learned categorical distribution over clause evaluation functions.<br>
@@ -228,12 +291,14 @@
 
 				<section>
 					<h3>Future Directions</h3>
-					<ul>
-						<li>Add Monte Carlo Tree Search (MCTS)</li>
-						<li>Neural states and actions as in TRAIL</li>
-						<li>Incorporate problem difficulty into rewards</li>
-						<li>Other ideas for how to retain the awesomeness of E's <span class="emph green">--auto</span> mode</li>
-					</ul>
+					<div class="box" style="padding: 1em 0em; width:80%; margin:auto;">
+						<ul>
+							<li>Add Monte Carlo Tree Search (MCTS)</li>
+							<li>Inspirations from TRAIL</li>
+							<li>Incorporate problem difficulty into rewards</li>
+							<li>Retaining the awesomeness of E's <span class="emph green">--auto</span> mode</li>
+						</ul>
+					</div>
 				</section>
 
 
