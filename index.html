@@ -188,15 +188,15 @@
 							<h3>RL in relation to E's Automatic Mode</h3>
 
 							<ul>
-									<li class="fragment"><span class="ul">E's "--auto" mode</span>: <em class="green">features of a problem</em> $\rightarrow$ <em class="green">heuristic</em></li>
-									<li class="fragment"><span class="ul">Usual RL idea</span>: <em class="green">state of E</em> $\rightarrow$ <em class="green">given clause</em></li>
-									<li class="fragment"><span class="ul">Our RL idea</span>: <em class="green">state of E</em> $\rightarrow$ <em class="green">probabilistic heuristic</em></li>
+									<li class="fragment" data-fragment-index="1"><span class="ul">E's "--auto" mode</span>: <em class="green">features of a problem</em> $\rightarrow$ <em class="green">heuristic</em></li>
+									<li class="fragment" data-fragment-index="2"><span class="ul">Our RL idea</span>: <em class="green">state of E</em> $\rightarrow$ <em class="green">probabilistic heuristic</em></li>
+									<li class="fragment" data-fragment-index="4"><span class="ul">Usual RL idea</span>: <em class="green">state of E</em> $\rightarrow$ <em class="green">given clause</em></li>
 									<br>
 							</ul>
 	
 							<div class="row">
-								<textarea class="fragment" cols="50" rows="7" style="overflow: hidden;">
-Example Heuristic in E's --auto mode:
+								<textarea cols="50" rows="7" style="overflow: hidden;">
+Example heuristic in E's --auto mode:
 
 10 * Clauseweight(PreferGoals,1,1,1),
 10 * Clauseweight(PreferNonGoals,1,1,1),
@@ -204,18 +204,33 @@ Example Heuristic in E's --auto mode:
 1 * FIFOWeight(ConstPrio)
 								</textarea>
 	
-								<textarea class="fragment" cols="50" rows="7" style="overflow: hidden;">
-Example Heuristic in Reinforcement Learning mode:
+								<textarea class="fragment" data-fragment-index="3" cols="50" rows="7" style="overflow: hidden;">
+Example heuristic in RL mode:
 
-0.1 * Clauseweight(PreferGoals,1,1,1),
-0.8 * Clauseweight(PreferNonGoals,1,1,1),
+0.5 * Clauseweight(PreferGoals,1,1,1),
+0.2 * Clauseweight(PreferNonGoals,1,1,1),
 0.1 * Clauseweight(ByHornDist,1,1,1),
-0.0 * FIFOWeight(ConstPrio),
+0.1 * FIFOWeight(ConstPrio),
 ...
 								</textarea>
 	
 							</div>
 						</div>
+
+						<aside class="notes">
+							E's given clause selection is normally guided by a schedule of clause evaluation functions known to E as a "heuristic".<br>
+							So a "heuristic" is a schedule of clause evaluation functions.<br>
+							A clause evaluation function is an instance of a generic weight function applied to a priority function and other arguments.<br>
+							The role of the priority functions is mostly to restrict the clause evaluation function to a certain class of clauses.
+							<br>
+							In E's "--auto" mode, it analyzes the input problem in order to assign a heuristic at the beginning of a proof attempt.
+							<br>
+							Our idea for Reinforcement Learning was to basically allow this heuristic to be changed over the course of a proof attempt.
+							This is why our "actions" are a distribution over clause evaluation functions.<br>
+							It's like a randomized version of E's schedule.<br>
+							<br>
+							This is unlike previous work where typically the action is actually selecting the given clause directly.
+						</aside>
 
 					</section>
 				</section>
@@ -224,10 +239,17 @@ Example Heuristic in Reinforcement Learning mode:
 					<h3>Incorporation of RL into Eprover</h3>
 					<!-- <section>
 						<img src="images/architecture.svg">
+					</section> -->
+
+					<section>
+						<div class="box" style="margin-top: 1em;">
+							<img src="images/architecture2.svg" style="width:80%;">
+						</div>
+
 						<aside class="notes">
 							This is a diagram to help me explain how we structured the learning in our experiment.<br>
-							The red box is our trusty theorem prover E.
-							The green boxes are all python scripts that otherwise guide the learning.<br><br>
+							On the left here is our trusty theorem prover E.
+							The green boxes are python scripts that guide the learning.<br><br>
 
 							e_caller.py invokes E with a problem to be solved.<br>
 							E itself has been modified to coordinate with gain_xp.py via named pipes.
@@ -237,15 +259,6 @@ Example Heuristic in Reinforcement Learning mode:
 
 							train_policy.py is used to update the policy according to which gain_xp.py acts.
 							It does this using data from previous proof attempts recorded by gain_xp.py
-						</aside>
-					</section> -->
-
-					<section>
-						<div class="box" style="margin-top: 1em;">
-							<img src="images/architecture2.svg" style="width:80%;">
-						</div>
-						<aside class="notes">
-							Here's another diagram describing the same system from a higher level.
 						</aside>
 					</section>
 				</section>
@@ -260,7 +273,9 @@ Example Heuristic in Reinforcement Learning mode:
 							<li>60 soft seconds given for timeout</li>
 						</ul>
 					</div>
-
+					<aside class="notes">
+						For evaluation of this approach, we used the bushy variants of problems from the MPTPTP2078 dataset which originally come from the Mizar Mathematical Library.
+					</aside>
 				</section>
 
 				<section>
