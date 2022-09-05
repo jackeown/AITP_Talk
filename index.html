@@ -121,6 +121,65 @@
 						</aside>
 					</section>
 
+				</section>
+
+				<section>
+					<h3>Incorporation of RL into Eprover</h3>
+
+					<section style="font-size:0.8em">
+						<div class="box" style="padding: 1em 0em;">
+							<h3>RL in relation to E's Automatic Mode</h3>
+
+							<ul>
+									<li class="fragment" data-fragment-index="1"><span class="ul">E's "--auto" mode</span>: <em class="green">features of a problem</em> $\rightarrow$ <em class="green">heuristic</em></li>
+									<li class="fragment" data-fragment-index="2"><span class="ul">Our RL idea</span>: <em class="green">state of E</em> $\rightarrow$ <em class="green">probabilistic heuristic</em></li>
+									<li class="fragment" data-fragment-index="4"><span class="ul">Usual RL idea</span>: <em class="green">state of E</em> $\rightarrow$ <em class="green">given clause</em></li>
+									<br>
+							</ul>
+	
+							<div class="row">
+								<textarea cols="50" rows="7" style="overflow: hidden;">
+Example heuristic in E's --auto mode:
+
+10 * Clauseweight(PreferGoals,1,1,1),
+10 * Clauseweight(PreferNonGoals,1,1,1),
+10 * Clauseweight(ByHornDist,1,1,1),
+1 * FIFOWeight(ConstPrio)
+								</textarea>
+	
+								<textarea class="fragment" data-fragment-index="3" cols="50" rows="7" style="overflow: hidden;">
+Example heuristic in RL mode:
+
+0.5 * Clauseweight(PreferGoals,1,1,1),
+0.2 * Clauseweight(PreferNonGoals,1,1,1),
+0.1 * Clauseweight(ByHornDist,1,1,1),
+0.1 * FIFOWeight(ConstPrio),
+...
+								</textarea>
+	
+							</div>
+						</div>
+
+						<aside class="notes">
+							E's given clause selection is normally guided by a schedule of clause evaluation functions known to E as a "heuristic".<br>
+							So a "heuristic" is a schedule of clause evaluation functions.<br>
+							A clause evaluation function is an instance of a generic weight function applied to a priority function and other arguments.<br>
+							The role of the priority functions is mostly to restrict the clause evaluation function to a certain class of clauses.
+							<br><br>
+							In E's "--auto" mode, it analyzes the input problem in order to assign a heuristic at the beginning of a proof attempt.
+							<br>
+							Our idea for Reinforcement Learning was to basically allow this heuristic to be changed over the course of a proof attempt.
+							This is why our "actions" are a distribution over clause evaluation functions.<br>
+							It's like a randomized version of E's schedule.<br>
+							<br>
+							This is unlike previous work where typically the action is actually selecting the given clause directly.<br><br>
+
+							One might also ask, "Why use reinforcement learning at all? Can't you just directly train a classifier to pick out useful clauses?"<br>
+							One reason is that a selected clause has a complicated effect on the proof search (more than just whether or not it ends up in the proof).
+						</aside>
+
+					</section>
+
 					<section>
 						<div style="outline:1px solid rgb(150, 255, 150); transform: scale(0.7); padding:1em;top:0px;">
 							<h4>Other choices to make</h4>
@@ -163,7 +222,7 @@
 							<ul>
 								<li class="fragment">What are the states, actions, and rewards?</li>
 								<li class="fragment"><span class="green">state:</span> <span class="red">length and average weight of processed and unprocessed sets</span></li>
-								<li class="fragment"><span class="green">actions:</span> <span class="red">choice from a static set of 75 clause evaluation functions (suggested by Stephan Schulz)</span></li>
+								<li class="fragment"><span class="green">actions:</span> <span class="red">choice from a static set of 75 clause evaluation functions (extracted from those used in --auto)</span></li>
 								<li class="fragment"><span class="green">rewards:</span> <span class="red">1 if proof found else 0</span></li>
 	
 								<li class="fragment">Monte Carlo Tree Search? - <span class="green">not yet</span></li>
@@ -176,70 +235,14 @@
 						<aside class="notes">
 							To represent E's state, we used a vector of 4 features: the length and average weight of the unprocessed and processed sets of clauses.<br>
 							<br>
-							What makes this work the most different from other approaches to this problem is our choice of action.<br>
-							Most other work directly tries to choose the given clause, but our actions are a choice from a static set of 75 clause evaluation functions (suggested by Stephan Schulz).<br>
+							One thing that makes this work different different from other approaches is our choice of action.<br>
+							Most other work directly tries to choose the given clause, but our actions are a choice from a static set of 75 clause evaluation functions (extracted from those used in --auto).<br>
 							<br>
 							For rewards, we simply give a zero for each iteration of the main given clause selection loop unless we have selected the empty clause.
 						</aside>
 					</section>
 
-					<section style="font-size:0.8em">
-						<div class="box" style="padding: 1em 0em;">
-							<h3>RL in relation to E's Automatic Mode</h3>
 
-							<ul>
-									<li class="fragment" data-fragment-index="1"><span class="ul">E's "--auto" mode</span>: <em class="green">features of a problem</em> $\rightarrow$ <em class="green">heuristic</em></li>
-									<li class="fragment" data-fragment-index="2"><span class="ul">Our RL idea</span>: <em class="green">state of E</em> $\rightarrow$ <em class="green">probabilistic heuristic</em></li>
-									<li class="fragment" data-fragment-index="4"><span class="ul">Usual RL idea</span>: <em class="green">state of E</em> $\rightarrow$ <em class="green">given clause</em></li>
-									<br>
-							</ul>
-	
-							<div class="row">
-								<textarea cols="50" rows="7" style="overflow: hidden;">
-Example heuristic in E's --auto mode:
-
-10 * Clauseweight(PreferGoals,1,1,1),
-10 * Clauseweight(PreferNonGoals,1,1,1),
-10 * Clauseweight(ByHornDist,1,1,1),
-1 * FIFOWeight(ConstPrio)
-								</textarea>
-	
-								<textarea class="fragment" data-fragment-index="3" cols="50" rows="7" style="overflow: hidden;">
-Example heuristic in RL mode:
-
-0.5 * Clauseweight(PreferGoals,1,1,1),
-0.2 * Clauseweight(PreferNonGoals,1,1,1),
-0.1 * Clauseweight(ByHornDist,1,1,1),
-0.1 * FIFOWeight(ConstPrio),
-...
-								</textarea>
-	
-							</div>
-						</div>
-
-						<aside class="notes">
-							E's given clause selection is normally guided by a schedule of clause evaluation functions known to E as a "heuristic".<br>
-							So a "heuristic" is a schedule of clause evaluation functions.<br>
-							A clause evaluation function is an instance of a generic weight function applied to a priority function and other arguments.<br>
-							The role of the priority functions is mostly to restrict the clause evaluation function to a certain class of clauses.
-							<br>
-							In E's "--auto" mode, it analyzes the input problem in order to assign a heuristic at the beginning of a proof attempt.
-							<br>
-							Our idea for Reinforcement Learning was to basically allow this heuristic to be changed over the course of a proof attempt.
-							This is why our "actions" are a distribution over clause evaluation functions.<br>
-							It's like a randomized version of E's schedule.<br>
-							<br>
-							This is unlike previous work where typically the action is actually selecting the given clause directly.
-						</aside>
-
-					</section>
-				</section>
-
-				<section>
-					<h3>Incorporation of RL into Eprover</h3>
-					<!-- <section>
-						<img src="images/architecture.svg">
-					</section> -->
 
 					<section>
 						<div class="box" style="margin-top: 1em;">
@@ -251,7 +254,7 @@ Example heuristic in RL mode:
 							On the left here is our trusty theorem prover E.
 							The green boxes are python scripts that guide the learning.<br><br>
 
-							e_caller.py invokes E with a problem to be solved.<br>
+							E is invoked with a problem to be solved.<br>
 							E itself has been modified to coordinate with gain_xp.py via named pipes.
 							E sends its "state" to gain_xp.py,<br>
 							gain_xp.py sends an "action" back to E,<br>
@@ -308,12 +311,22 @@ Example heuristic in RL mode:
 					<h3>Future Directions</h3>
 					<div class="box" style="padding: 1em 0em; width:80%; margin:auto;">
 						<ul>
-							<li>Add Monte Carlo Tree Search (MCTS)</li>
-							<li>Inspirations from TRAIL</li>
-							<li>Incorporate problem difficulty into rewards</li>
-							<li>Retaining the awesomeness of E's <span class="emph green">--auto</span> mode</li>
+							<li>More robust state space</li>
+							<li class="fragment">Add Monte Carlo Tree Search (MCTS)</li>
+							<li class="fragment">Inspirations from TRAIL</li>
+							<li class="fragment">Incorporate problem difficulty into rewards</li>
+							<li class="fragment">Retaining the awesomeness of E's <span class="emph green">--auto</span> mode</li>
 						</ul>
 					</div>
+
+					<aside class="notes">
+						The size and average weight of the unprocessed and processed sets is a very minimal representation of E's internal state.<br>
+						We chose such a minimal state, because it allows us to bypass embedding clauses, but it's probably too simple to learn an effective reinforcement learning policy.<br><br>
+						Monte Carlo Tree Search is used by most previous work and seems like a key ingredient to their success.<br><br>
+						The TRAIL paper showed a very interesting, but straightforward way to model the states, actions, and policy that seems very promising.<br><br>
+						Perhaps problem difficulty could be incorporated into the rewards so that difficult problems give more reward for solving and less punishment for failing to solve.<br><br>
+						Lastly, perhaps RL models could be tuned so that they default to --auto mode, but deviate when advantageous.<br>
+					</aside>
 				</section>
 
 
